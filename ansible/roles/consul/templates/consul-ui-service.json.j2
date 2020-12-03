@@ -1,0 +1,11 @@
+{
+  "service": {
+    "Name": "consul-ui",
+    "Port": 8500,
+    "check": {
+      "id": "http-check",
+      "http": "http://{{ ansible_eth0.ipv4.address }}:8500",
+      "interval": "3s"
+    }
+  }
+}

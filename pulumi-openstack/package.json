@@ -1,0 +1,16 @@
+{
+    "name": "pulumi-openstack",
+    "devDependencies": {
+        "@types/lodash": "^4.14.161",
+        "@types/node": "^10.0.0"
+    },
+    "dependencies": {
+        "@pulumi/kubernetes": "^2.0.0",
+        "@pulumi/kubernetesx": "^0.1.1",
+        "@pulumi/openstack": "^2.6.0",
+        "@pulumi/pulumi": "^2.0.0",
+        "@sophosoft/hard-cidr": "^1.1.2",
+        "lodash": "^4.17.20",
+        "netmask": "^1.0.6"
+    }
+}

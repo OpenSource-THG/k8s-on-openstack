@@ -1,0 +1,19 @@
+---
+
+  - name: Create group
+    group: name=devs state=present
+
+  - name: Create users
+    user: name="{{ item.name }}" groups="wheel,devs"
+    with_items: "{{ ssh_users }}"
+
+  - name: Check sudoers doesnt require password
+    lineinfile: "dest=/etc/sudoers state=present regexp='^%wheel' line='%wheel ALL=(ALL) NOPASSWD: ALL' backup=yes"
+
+  - name: Remove wheel from sudoers group
+    lineinfile: dest=/etc/sudoers state=absent regexp="^%wheel ALL=(ALL)$"
+
+
+  - name: Add ssh user keys
+    authorized_key: user={{ item.name }} key="{{ item.key }}"
+    with_items: "{{ ssh_users }}"

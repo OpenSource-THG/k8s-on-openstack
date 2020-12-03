@@ -1,0 +1,7 @@
+config:
+  openstack:authUrl: openstack:authUrl: https://openstack.auth-endpoint:5000
+  openstack:cloud: example
+  pulumi-openstack:infra_version: 0.49.0
+  pulumi-openstack:project_id: 
+  pulumi-openstack:region: 
+  pulumi-openstack:user_domain_name: example

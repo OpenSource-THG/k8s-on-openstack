@@ -1,0 +1,6 @@
+---
+  - name: Install sysstat
+    yum:
+      name: sysstat
+      state: present
+    ignore_errors: yes

@@ -1,0 +1,12 @@
+#jinja2: trim_blocks:False
+{%- set total_stars = 30 %}
+{%- for s in range(total_stars|int) %}*{% endfor %}
+{%- set env_length = ("environment"|length) %}
+{%- set l_s = (total_stars-2-env_length)/2 %}
+{%- set r_s = total_stars-2-env_length-(l_s|int) %}
+{% for s in range(l_s|int) %}*{% endfor %} environment {% for s in range(r_s|int) %}*{% endfor %}
+{%- set env_length = (env_name|length) %}
+{%- set l_s = (total_stars-2-env_length)/2 %}
+{%- set r_s = total_stars-2-env_length-(l_s|int) %}
+{% for s in range(l_s|int) %}*{% endfor %} {{ env_name }} {% for s in range(r_s|int) %}*{% endfor %}
+{% for s in range(total_stars|int) %}*{% endfor %}

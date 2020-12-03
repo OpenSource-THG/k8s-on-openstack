@@ -1,0 +1,6 @@
+---
+  consul_version: 1.6.1
+  consul_url: https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip
+  consul_file: consul-{{ consul_version }}.linux-amd64.zip
+  consul_sha256: sha256:a8568ca7b6797030b2c32615b4786d4cc75ce7aee2ed9025996fe92b07b31f7e
+  gossip_enc_key: n0b1ezKdl07Ai8R+s5PMU0TXZbpZn1NkybReOH7w96s=

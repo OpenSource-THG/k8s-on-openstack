@@ -1,0 +1,5 @@
+#!/bin/sh
+# Prepend 127.0.0.1 to the list of name servers if new servers are being set.
+if [ -n "$new_domain_name_servers" ]; then
+    new_domain_name_servers="127.0.0.1 $new_domain_name_servers"
+fi

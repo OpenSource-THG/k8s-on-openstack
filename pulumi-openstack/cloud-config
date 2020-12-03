@@ -1,0 +1,76 @@
+#cloud-config
+write_files:
+  - path: /etc/openstack/clouds.yaml
+    content: |
+      clouds:
+        openstack:
+          auth:
+            auth_url: "${auth_url}"
+            username: "${os_service_account_user}"
+            password: "${os_service_account_pass}"
+            project_id: "${project_id}"
+            user_domain_name: "${user_domain_name}"
+          region_name: "${region}"
+          interface: "public"
+          identity_api_version: 3
+    owner: root:root
+    permissions: '0644'
+
+  - path: /etc/profile.d/thg-env-vars.sh
+    content: |
+      export AWS_ACCESS_KEY_ID=${aws_access_key_id}
+      export AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
+    owner: root:root
+    permissions: '0644'
+
+  - path: /etc/consul-environment
+    content: |
+      OS_USERNAME=${os_service_account_user}
+      OS_PASSWORD=${os_service_account_pass}
+    owner: root:root
+    permissions: '0644'
+
+  - path: /etc/yum.repos.d/kubernetes.repo
+    content: |
+      [kubernetes]
+      name=Kubernetes
+      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+      enabled=1
+      gpgcheck=1
+      repo_gpgcheck=1
+      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    owner: root:root
+    permissions: '0644'
+
+  - path: /var/lib/cloud/instance/scripts/bootstrap.sh
+    content: |
+        #!/bin/bash -xe
+        source /etc/profile.d/thg-env-vars.sh
+
+        #Install pip, ansible & requirements
+        yum update -y
+        curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /tmp/jq
+        mv /tmp/jq /usr/bin
+        chmod +x /usr/bin/jq
+
+        META=$(curl -s http://169.254.169.254/openstack/2018-08-27/meta_data.json | jq -r '.meta')
+        PIP_VERSION=$(echo $META | jq -r '.pip')
+        DEPENDENCIES=$(echo $META | jq -rj '.dependencies' | jq -j 'keys[] as $k | "\($k)==\(.[$k]) "')
+        INFRA_BUILD_NUMBER=$(echo $META | jq -rj '.infra_version')
+        PLAYBOOK_DIR=$(echo $META | jq -rj '.playbook_dir')
+        PLAYBOOK=$(echo $META | jq -rj '.playbook')
+        ENV_VARS=$(echo $META | jq -rj '.env_vars_file')
+
+        curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
+        python /tmp/get-pip.py "pip==$PIP_VERSION"
+        pip install --ignore-installed --upgrade $DEPENDENCIES
+
+        cd /tmp
+        aws s3 cp s3://thg-voyager-build-assets/$INFRA_BUILD_NUMBER/k8s-infrastructure-$INFRA_BUILD_NUMBER.tgz /tmp/infrastructure-$INFRA_BUILD_NUMBER.tgz
+        tar -zxvf infrastructure-$INFRA_BUILD_NUMBER.tgz
+
+        cd "/tmp/ansible/playbooks/$PLAYBOOK_DIR"
+        ansible-playbook $PLAYBOOK -i /tmp/ansible/inventories/openstack.yaml \
+        --extra-vars="@/tmp/ansible/environment_vars/$ENV_VARS"
+    owner: root:root
+    permissions: '0755'

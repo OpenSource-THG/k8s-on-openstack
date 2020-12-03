@@ -1,0 +1,17 @@
+#  Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+.idea
+.project
+.gradle/
+build/
+.project
+.classpath
+.settings/
+.DS_Store
+ssh.config
+__pycache__/

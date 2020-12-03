@@ -1,0 +1,19 @@
+plugins {
+    id 'nebula.release' version '14.1.0'
+    id 'co.riiid.gradle' version '0.4.2'
+}
+
+repositories {
+    mavenCentral()
+}
+
+github {
+    owner = 'OpenSource-THG'
+    repo = 'k8s-on-openstack'
+    token = System.getenv('GRGIT_PASS') ?: "-"
+    tagName = "v${version}"
+    name = "${version}"
+    prerelease = ("${version}".contains("-rc"))
+}
+
+tasks.release.finalizedBy tasks.githubRelease

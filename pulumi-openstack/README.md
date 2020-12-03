@@ -1,0 +1,1 @@
+# Pulumi code for provisioning instances etc in openstack

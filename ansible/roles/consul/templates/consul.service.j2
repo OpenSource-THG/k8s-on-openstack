@@ -1,0 +1,15 @@
+[Unit]
+Description=Consul Agent Service
+After=network.target
+
+[Service]
+Type=simple
+User=consul
+EnvironmentFile=-/etc/consul-environment
+ExecStart=/opt/consul/consul agent {{extra_flags | default("")}} -config-dir=/opt/consul/conf/ -bind '{% raw %}{{ GetAllInterfaces | include "name" "^eth" | include "flags" "forwardable|up" | attr "address" }}{% endraw %}'
+Restart=on-failure
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,138 @@
+---
+  - name: Install required packages
+    yum:
+      name: ['wget', 'unzip', 'bind-utils', 'dnsmasq']
+      state: present
+
+  - name: Ensure consul environment file exists
+    stat:
+      path: /etc/consul-environment
+    register: consul_env_file
+
+  - name: Fail if environment file missing
+    fail:
+      msg: "The file /etc/consul-environment is not present"
+    when: consul_env_file.stat.exists == False
+
+  - stat: path="/tmp/{{ consul_file }}"
+    register: consul_install_file
+
+  - name: Create consul user
+    user:
+      name: consul
+      append: yes
+
+  - name: Download Consul
+    when: consul_install_file.stat.exists == False
+    get_url:
+      url: "{{ consul_url }}"
+      dest: "/tmp/{{ consul_file }}"
+      checksum: "{{ consul_sha256 }}"
+    register: get_url_result
+    retries: 5
+    until: get_url_result is successful
+
+  - name: Create consul directory
+    file: 
+      path: /opt/consul 
+      state: directory 
+      owner: consul
+
+  - name: unpack consul
+    unarchive: src=/tmp/{{ consul_file }}
+                dest=/opt/consul
+                copy=no
+                owner=consul
+
+  - name: update owner of consul
+    file: 
+      path: /opt/consul/ 
+      owner: consul
+
+  - name: Create symlink /usr/bin
+    file: 
+      src: /opt/consul/consul 
+      dest: /usr/bin/consul 
+      state: link
+
+  - name: Create consul config directory
+    file: 
+      path: /opt/consul/conf 
+      state: directory 
+      owner: consul
+
+  - name: Create consul data directory
+    file: 
+      path: /opt/consul/data 
+      state: directory 
+      owner: consul
+
+  - name: Define UI flag for server config
+    set_fact:
+      extra_flags: "-ui-content-path=/consul/ -ui"
+    when: clientServer == "server"
+
+  - name: Copy UI service definition
+    template: 
+      src: consul-ui-service.json.j2 
+      dest: /opt/consul/conf/consul-ui-service.json 
+      owner: consul
+    when: clientServer == "server"
+
+  - name: Create consul server config
+    template: 
+      src: server.openstack.json.j2 
+      dest: /opt/consul/conf/server.json 
+      owner: consul
+    when: clientServer == "server"
+    
+
+  - name: Create consul client config
+    template: 
+      src: client.openstack.json.j2 
+      dest: /opt/consul/conf/client.json 
+      owner: consul
+    when: clientServer == "client"
+
+  - name: add dhclient hook
+    copy:
+      src: dhclient-enter-hooks
+      dest: /etc/dhcp/dhclient-enter-hooks
+      mode: '0755'
+
+  - name: add dnsmasq configuration
+    copy:
+      src: dnsmasq-consul
+      dest: /etc/dnsmasq.d/10-consul
+
+  - name: restart network
+    service:
+      name: network
+      state: restarted
+
+  - name: restart dnsmasq
+    service: 
+      name: dnsmasq 
+      state: restarted
+
+  - name: Load the system service for dnsmasq
+    command: systemctl enable /usr/lib/systemd/system/dnsmasq.service
+    notify: reload systemd
+
+  - name: Add systemd startup script
+    template: 
+      src: consul.service.j2 
+      dest: /etc/systemd/system/consul.service
+    notify: reload systemd
+
+  - name: Load the system service for consul
+    command: systemctl enable /etc/systemd/system/consul.service
+    notify: reload systemd
+
+  - name: start consul
+    service: 
+      name: consul 
+      state: started
+
+  - name: restart consul
+    command: systemctl restart consul

@@ -1,0 +1,99 @@
+---
+
+  - name: Install firewalld
+    yum:
+      name: firewalld
+      state: present
+
+  - name: Start firewall
+    service: 
+      name: firewalld 
+      state: started
+
+  - name: Set firewalld rules - port 22
+    firewalld:
+      rich_rule: rule family=ipv4 source address={{ k8s_cidr }} port port=22 protocol=tcp accept
+      zone:      public
+      permanent: true
+      immediate: true
+      state:     enabled
+
+  - name: Set firewalld rules - port 2379
+    firewalld:
+      rich_rule: rule family=ipv4 source address={{ k8s_cidr }} port port=2379 protocol=tcp accept
+      zone:      public
+      permanent: true
+      immediate: true
+      state:     enabled
+
+  - name: Set firewalld rules - port 2380
+    firewalld:
+      rich_rule: rule family=ipv4 source address={{ k8s_cidr }} port port=2380 protocol=tcp accept
+      zone:      public
+      permanent: true
+      immediate: true
+      state:     enabled
+  
+  - name: Set firewalld rules - port 6443
+    firewalld:
+      rich_rule: rule family=ipv4 source address={{ k8s_cidr }} port port=6443 protocol=tcp accept
+      zone:      public
+      permanent: true
+      immediate: true
+      state:     enabled
+
+  - name: Set firewalld rules - port 10250-10252
+    firewalld:
+      rich_rule: rule family=ipv4 source address={{ k8s_cidr }} port port=10250-10252 protocol=tcp accept
+      zone:      public
+      permanent: true
+      immediate: true
+      state:     enabled
+
+  - name: Set firewalld rules - port 10259
+    firewalld:
+      rich_rule: rule family=ipv4 source address={{ k8s_cidr }} port port=10259 protocol=tcp accept
+      zone:      public
+      permanent: true
+      immediate: true
+      state:     enabled
+
+  - name: Set firewalld rules - port 16443
+    firewalld:
+      rich_rule: rule family=ipv4 source address={{ k8s_cidr }} port port=16443 protocol=tcp accept
+      zone:      public
+      permanent: true
+      immediate: true
+      state:     enabled
+
+  - name: Set firewalld rules - port 4001
+    firewalld:
+      rich_rule: rule family=ipv4 source address={{ k8s_cidr }} port port=4001 protocol=tcp accept
+      zone:      public
+      permanent: true
+      immediate: true
+      state:     enabled
+
+  - name: Set firewalld rules - port 30000-32767
+    firewalld:
+      rich_rule: rule family=ipv4 source address={{ k8s_cidr }} port port=30000-32767 protocol=tcp accept
+      zone:      public
+      permanent: true
+      immediate: true
+      state:     enabled
+
+  - name: Set firewalld rules - port 8300-8600 tcp
+    firewalld:
+      rich_rule: rule family=ipv4 source address={{ k8s_cidr }} port port=8300-8600 protocol=tcp accept
+      zone:      public
+      permanent: true
+      immediate: true
+      state:     enabled
+
+  - name: Set firewalld rules - port 8300-8600 udp
+    firewalld:
+      rich_rule: rule family=ipv4 source address={{ k8s_cidr }} port port=8300-8600 protocol=udp accept
+      zone:      public
+      permanent: true
+      immediate: true
+      state:     enabled

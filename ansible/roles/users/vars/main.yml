@@ -1,0 +1,4 @@
+ssh_users:
+  - name: example
+    key: "{{ lookup('file', 'example.pub') }}"
+group_name: devs

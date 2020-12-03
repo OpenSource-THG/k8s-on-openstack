@@ -1,0 +1,90 @@
+---
+  - name: Config br_netfilter
+    copy:
+      src: sysctl-k8s.conf
+      dest: /etc/sysctl.d/k8s.conf
+
+  - name: Update sysctl
+    command: sysctl --system
+
+  - name: Install docker-requirements
+    yum:
+      name:
+        - yum-utils 
+        - device-mapper-persistent-data 
+        - lvm2
+      state: present
+
+  - name: Add docker repo
+    command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+  - name: Yum Update
+    command: yum update -y
+
+  - name: Install Docker CE
+    yum:
+      name:
+        - containerd.io-{{ containerd_version }}
+        - docker-ce-{{ docker_ce_version }}
+        - docker-ce-cli-{{ docker_ce_version }}
+      state: present
+
+  - name: make docker etc dir
+    file:
+      path: /etc/docker
+      state: directory
+
+  - name: copy daemon.json
+    copy:
+      src: daemon.json
+      dest: /etc/docker/daemon.json
+
+  - name: make systemd dir
+    file:
+      path: /etc/systemd/system/docker.service.d
+      state: directory
+
+  - name: daemon-reload
+    command: systemctl daemon-reload
+
+  - name: restart docker
+    command: systemctl restart docker
+
+  - name: enable docker
+    command: systemctl enable docker
+
+  - name: Install k8s packages
+    yum:
+      name: 
+        - kubeadm
+        - kubelet
+        - kubectl
+      state: present
+
+  - name: enable kubelet
+    command: systemctl enable kubelet
+
+  - name: wait for k8s to become initialised
+    uri:
+      url: http://localhost:8500/v1/kv/k8s/cluster-initialised
+      status_code: 200
+      use_proxy: no
+    register: initialised_state
+    until: initialised_state.status == 200
+    retries: 100
+    delay: 20
+
+  - name: fetch controller node ipv4
+    command: consul kv get first_controller
+    register: controller_ip
+
+  - name: fetch k8s_join_token
+    command: consul kv get k8s_join_token
+    register: join_token
+
+  - name: fetch hash
+    command: consul kv get k8s_join_token_hash
+    register: hash
+
+  - name: join
+    command: kubeadm join --token {{ join_token.stdout }} {{ controller_ip.stdout }}:6443 --discovery-token-ca-cert-hash sha256:{{ hash.stdout }}

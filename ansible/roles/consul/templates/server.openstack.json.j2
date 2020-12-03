@@ -1,0 +1,17 @@
+{
+    "bootstrap_expect": 3,
+    "server": true,
+    "node_name": "{{ ansible_hostname }}",
+    "datacenter": "{{ os_region }}",
+    "data_dir": "/opt/consul/data/",
+    "encrypt": "{{ gossip_enc_key }}",
+    "log_level": "INFO",
+    "enable_syslog": true,
+    "client_addr": "0.0.0.0",
+    "leave_on_terminate": true,
+    "dns_config": {
+        "allow_stale": true,
+        "node_ttl": "10s"
+    },
+    "retry_join": ["provider=os tag_key=component tag_value=k8s-controller auth_url={{ auth_url }} domain_name={{ os_domain }} tenant_id={{ tenant_id }} region={{ os_region }}"]
+}

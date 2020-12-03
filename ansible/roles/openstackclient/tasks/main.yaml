@@ -1,0 +1,12 @@
+---
+
+  - name: install dependencies
+    yum:
+      name: ['gcc', 'python-devel']
+      state: present
+
+  - name: install openstackclient
+    command: pip install python-openstackclient
+
+  - name: install openstack barbican client
+    command: pip install python-barbicanclient

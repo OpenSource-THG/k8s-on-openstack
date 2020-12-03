@@ -1,0 +1,3 @@
+config:
+  openstack:authUrl: https://openstack.auth-endpoint:5000
+  openstack:cloud: example

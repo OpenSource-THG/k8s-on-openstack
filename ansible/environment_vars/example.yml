@@ -1,0 +1,11 @@
+---
+  env_name: k8s-poc
+  os_region: eu-west
+  os_env: example
+  auth_url: https://openstack.auth-endpoint:5000/v3
+  tenant_id: 
+  os_domain: example
+  env: poc
+  k8s_cidr: "10.66.1.0/24"
+  pod_subnet: "192.168.0.0/16"
+    

@@ -1,0 +1,3 @@
+name: pulumi-openstack
+runtime: nodejs
+description: A minimal OpenStack / Kubernetes TypeScript Pulumi program
